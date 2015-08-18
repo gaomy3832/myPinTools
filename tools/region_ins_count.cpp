@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "pin.H"
+#include "magic_op.h"
 
 // Total instruction count in ROI.
 static UINT64 icnt = 0;
@@ -9,11 +10,6 @@ static UINT32 rcnt = 0;
 
 // Output file handler.
 ofstream outFileHdl;
-
-// ROI switch routine names. Call externally-visible non-inline functions with
-// such names to switch on/off ROI.
-static const char* startROI = "pintool_roi_begin";
-static const char* endROI = "pintool_roi_end";
 
 /*
  * Trace instrumentation.
@@ -33,6 +29,13 @@ VOID Trace(TRACE trace, VOID* v) {
                 IARG_UINT32, BBL_NumIns(bbl),
                 IARG_END);
     }
+
+    // To detect magic op.
+    for (BBL bbl = TRACE_BblHead(trace); BBL_Valid(bbl); bbl = BBL_Next(bbl)) {
+        for (INS ins = BBL_InsHead(bbl); INS_Valid(ins); ins = INS_Next(ins)) {
+            DetectMagicOp(ins);
+        }
+    }
 }
 
 /*
@@ -40,33 +43,13 @@ VOID Trace(TRACE trace, VOID* v) {
  *
  * beforeROI and afterROI switch bblFunc, and also count number of ROIs.
  */
-VOID PIN_FAST_ANALYSIS_CALL beforeROI() {
+void beforeROI() {
     bblFunc = doCount;
     rcnt++;
 }
 
-VOID PIN_FAST_ANALYSIS_CALL afterROI() {
+void afterROI() {
     bblFunc = noCount;
-}
-
-VOID Image(IMG img, VOID* v) {
-    RTN rtnStart = RTN_FindByName(img, startROI);
-    if (RTN_Valid(rtnStart)) {
-        RTN_Open(rtnStart);
-        RTN_InsertCall(rtnStart, IPOINT_BEFORE,
-                AFUNPTR(beforeROI),
-                IARG_END);
-        RTN_Close(rtnStart);
-    }
-
-    RTN rtnEnd = RTN_FindByName(img, endROI);
-    if (RTN_Valid(rtnEnd)) {
-        RTN_Open(rtnEnd);
-        RTN_InsertCall(rtnEnd, IPOINT_AFTER,
-                AFUNPTR(afterROI),
-                IARG_END);
-        RTN_Close(rtnEnd);
-    }
 }
 
 /*
@@ -111,8 +94,10 @@ int main(int argc, char * argv[]) {
         outFileHdl.open(KnobOutputFile.Value().c_str());
     }
 
+    RegisterROIBeginCallback(beforeROI);
+    RegisterROIEndCallback(afterROI);
+
     TRACE_AddInstrumentFunction(Trace, 0);
-    IMG_AddInstrumentFunction(Image, 0);
 
     PIN_AddFiniFunction(Fini, 0);
 
