@@ -1,12 +1,12 @@
 
-PIN_ROOT ?= $(PINPATH)
+export PIN_ROOT ?= $(PINPATH)
 
 all: tools
 
 tools:
-	$(MAKE) -C tools --no-print-directory PIN_ROOT=$(PIN_ROOT)
+	$(MAKE) -C tools --no-print-directory
 
 clean:
-	$(MAKE) clean -C tools --no-print-directory PIN_ROOT=$(PIN_ROOT)
+	$(MAKE) clean -C tools --no-print-directory
 
 .PHONY: all tools clean
