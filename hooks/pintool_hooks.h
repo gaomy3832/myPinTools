@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include "../include/magic_op_code.h"
+#include "../src/magic_op_code.h"
 
 // Avoid optimizing compilers moving code around this barrier
 #define COMPILER_BARRIER() { __asm__ __volatile__("" ::: "memory");}

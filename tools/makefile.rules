@@ -5,7 +5,7 @@
 #
 ##############################################################
 
-TOOL_CXXFLAGS += -I../include -std=c++11
+TOOL_CXXFLAGS += -std=c++11 -I../src
 
 ##############################################################
 #
@@ -75,7 +75,7 @@ LIB_ROOTS :=
 # This section contains the build rules for all binaries that have special build rules.
 # See makefile.default.rules for the default build rules.
 
-$(OBJDIR)region_ins_count$(OBJ_SUFFIX): ../include/magic_op.h
+$(OBJDIR)region_ins_count$(OBJ_SUFFIX): ../src/magic_op.h
 
 $(OBJDIR)region_ins_count$(PINTOOL_SUFFIX): $(OBJDIR)region_ins_count$(OBJ_SUFFIX) ../src/$(OBJDIR)magic_op$(OBJ_SUFFIX)
 	$(LINKER) $(TOOL_LDFLAGS) $(LINK_EXE)$@ $^ $(TOOL_LPATHS) $(TOOL_LIBS)
