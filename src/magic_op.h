@@ -5,7 +5,7 @@
 #include "pin.H"
 #include "magic_op_code.h"
 
-typedef std::function<void(void)> Callback;
+typedef void (*Callback)(void);
 
 VOID RegisterMagicOpCallback(ADDRINT op, const Callback& cb);
 
